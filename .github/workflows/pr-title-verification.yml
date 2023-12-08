@@ -25,7 +25,7 @@ jobs:
         id: check-title
         run: |
           echo '${{ github.event.pull_request.title }}'
-          [[ '${{ github.event.pull_request.title }}' =~ ^.*\PAB-[0-9]+|no-issue\.*$ ]] || [[ '${{ github.event.pull_request.description }}' =~ ^.*\PAB-[0-9]+|no-issue\.*$ ]] || && exit 0 || echo "missing-id=true" >> $GITHUB_OUTPUT
+          [[ '${{ github.event.pull_request.title }}' =~ ^.*\PAB-[0-9]+|no-issue\.*$ ]] || [[ '${{ github.event.pull_request.description }}' =~ ^.*\PAB-[0-9]+|no-issue\.*$ ]] && exit 0 || echo "missing-id=true" >> $GITHUB_OUTPUT
       - name: Ticket id missing in PR title
         if: ${{ steps.check-title.outputs.missing-id == 'true' }}
         run: |
