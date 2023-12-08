@@ -1,0 +1,33 @@
+# This is a basic workflow to help you get started with Actions
+
+name: PR
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - edited
+      - reopened
+
+  # Allows you to run this workflow manually from the Actions tab
+ # workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  title:
+    name: Title Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checking Title
+        id: check-title
+        run: |
+          echo '${{ github.event.pull_request.title }}'
+          [[ '${{ github.event.pull_request.title }}' =~ ^.*\[(((PAB)-[0-9]+)|(no-issue))\].*$ ]] && exit 0 || echo "missing-id=true" >> $GITHUB_OUTPUT
+      - name: Ticket id missing in PR title
+        if: ${{ steps.check-title.outputs.missing-id == 'true' }}
+        run: |
+          echo "::error ::Ticket id missing in PR title. Please add a either '[PAB-<id>]' or '[no-issue]' to your PR title."
+          exit 1
