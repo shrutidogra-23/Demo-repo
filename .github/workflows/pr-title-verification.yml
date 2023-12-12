@@ -23,8 +23,8 @@ jobs:
     # - Secondly, this won't get (sometimes necessary) write-access to the repo if triggered off of a Dependabot event ( https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions#responding-to-events )
     if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
-      - name: Checking PR Title/Body
-        id: check-title/body
+      - name: Checking PR Title and Body
+        id: check-title-body
         run: |
           echo 'Title - ${{ github.event.pull_request.title }}'
           echo 'Body - ${{  github.event.pull_request.body }}'
