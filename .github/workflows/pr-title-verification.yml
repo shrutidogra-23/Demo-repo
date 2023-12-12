@@ -1,34 +1,36 @@
-# This is a basic workflow to help you get started with Actions
+# This workflow checks that an [iTrac Id] is included in the PR title or body
+# If the PR doesn't correspond to any iTrac issue, then '[no-issue]' should be present in the PR title or body
 
 name: PR check
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   pull_request:
     types:
       - opened
       - synchronize
       - edited
-      - reopened
+      - reopene
 
-  # Allows you to run this workflow manually from the Actions tab
- # workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   title:
-    name: Title Verification
-    runs-on: ubuntu-latest
+    name: PR Title/Body Verification
+    runs-on: [ self-hosted, linux, apama ]
+    # Do not run on Dependabot-generated PRs
+    # - Firstly, it's pointless (all machine generated)
+    # - Secondly, this won't get (sometimes necessary) write-access to the repo if triggered off of a Dependabot event ( https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions#responding-to-events )
+    if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
-      - name: Checking Title
-        id: check-title
+      - name: Checking PR Title/Body
+        id: check-title/body
         run: |
           echo 'Title - ${{ github.event.pull_request.title }}'
-          echo 'Description - ${{  github.event.pull_request.body }}'
+          echo 'Body - ${{  github.event.pull_request.body }}'
           [[ '${{ github.event.pull_request.title }}' =~ ^.*\[PAB-[0-9]+\]|\[no-issue\].*$ ]] || [[ '${{ github.event.pull_request.description }}' =~ ^.*\[PAB-[0-9]+\]|\[no-issue\].*$ ]] && exit 0 || echo "missing-id=true" >> $GITHUB_OUTPUT
-      - name: Ticket id missing in PR title
+      - name: iTrac id missing in PR title/body
         if: ${{ steps.check-title.outputs.missing-id == 'true' }}
         run: |
-          echo "::error ::Ticket id missing in PR title. Please add a either '[PAB-<id>]' or '[no-issue]' to your PR title."
+          echo "::error ::iTrac id missing in PR title/body. Please add a either '[PAB-<id>]' or '[no-issue]' to your PR title/body."
           exit 1
