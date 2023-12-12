@@ -17,7 +17,7 @@ concurrency:
 jobs:
   title:
     name: PR Title and Body Verification
-    runs-on: [ ubuntu ]
+    runs-on: ubuntu-latest
     # Do not run on Dependabot-generated PRs
     # - Firstly, it's pointless (all machine generated)
     # - Secondly, this won't get (sometimes necessary) write-access to the repo if triggered off of a Dependabot event ( https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions#responding-to-events )
