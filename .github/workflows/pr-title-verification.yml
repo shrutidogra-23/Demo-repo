@@ -25,7 +25,7 @@ jobs:
         run: |
           # Check if iTrac/Jira issue id are present in the title or body
           # for Title, enforce that the id/no-issue are specified at the end. They can be present anywhere in the body
-          if [[ ! ( ( $PR_TITLE =~ ^.*\[(PAB-\d+|no-issue)\]\s*$ ) || ( $PR_BODY =~ ^.*\[(((PAB)-[0-9]+)|(no-issue))\].*$ ) ) ]]; then
+          if [[ ! ( ( $PR_TITLE =~ ^.*\[PAB-\d+\]\s*$ ) ||( $PR_TITLE =~ ^.*\[no-issue\]\s*$ ) || ( $PR_BODY =~ ^.*\[(((PAB)-[0-9]+)|(no-issue))\].*$ ) ) ]]; then
             echo "::error ::iTrac id missing in PR title/body. Please add either a '[PAB-<id>]' or '[no-issue]' at the end of PR title or in PR body."
             exit 1
           else
