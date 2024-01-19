@@ -1,7 +1,7 @@
 # This workflow checks that an [iTrac Id] is included in the PR title or body
 # If the PR doesn't correspond to any iTrac issue, then '[no-issue]' should be present in the PR title or body
 
-name: PR check
+name: PR Title and Body Verification
 on:
   pull_request:
     types:
@@ -17,20 +17,26 @@ concurrency:
 jobs:
   title:
     name: PR Title and Body Verification
-    runs-on: ubuntu-latest
+    runs-on: [ self-hosted, linux, apama ]
     # Do not run on Dependabot-generated PRs
     # - Firstly, it's pointless (all machine generated)
     # - Secondly, this won't get (sometimes necessary) write-access to the repo if triggered off of a Dependabot event ( https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions#responding-to-events )
     if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
-      - name: Checking PR Title and Body
-        id: check-title-body
+      - name: Checking PR title and body
+        id: check-title
+        shell: bash
         run: |
-          echo 'Title - ${{ github.event.pull_request.title }}'
-          echo 'Body - ${{  github.event.pull_request.body }}'
-          [[ '${{ github.event.pull_request.title }}' =~ ^.*\[PAB-[0-9]+\]|\[no-issue\].*$ ]] || [[ '${{ github.event.pull_request.description }}' =~ ^.*\[PAB-[0-9]+\]|\[no-issue\].*$ ]] && exit 0 || echo "missing-id=true" >> $GITHUB_OUTPUT
-      - name: iTrac id missing in PR title/body
-        if: ${{ steps.check-title.outputs.missing-id == 'true' }}
-        run: |
-          echo "::error ::iTrac id missing in PR title/body. Please add a either '[PAB-<id>]' or '[no-issue]' to your PR title/body."
-          exit 1
+          # Check if iTrac/Jira issue id are present in the title or body
+          # for Title, enforce that the id/no-issue are specified at the end. They can be present anywhere in the body
+          if [[ ! ( ( $PR_TITLE =~ ^.*\[(((PAB)-[0-9]+)|(no-issue))\]\s*$ ) || ( $PR_BODY =~ ^.*\[(((PAB)-[0-9]+)|(no-issue))\].*$ ) ) ]]; then
+            echo "::error ::iTrac id missing in PR title/body. Please add either a '[PAB-<id>]' or '[no-issue]' at the end of PR title or in PR body."
+            exit 1
+          else
+            echo "PR Title and Body Verification passed successfully"
+            exit 0
+          fi
+        env:
+          # Passtitle/body as env variables to deal with special characters/escaping
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
