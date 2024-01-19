@@ -17,7 +17,7 @@ concurrency:
 jobs:
   title:
     name: PR Title and Body Verification
-    runs-on: [ self-hosted]
+    runs-on: ubuntu-latest
     steps:
       - name: Checking PR title and body
         id: check-title
